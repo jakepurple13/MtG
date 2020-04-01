@@ -13,8 +13,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.programmersbox.dragswipe.DragSwipeAdapter
+import com.programmersbox.flowutils.RecyclerViewScroll
 import com.programmersbox.flowutils.clicks
 import com.programmersbox.flowutils.collectOnUi
+import com.programmersbox.flowutils.scrollReached
 import com.programmersbox.helpfulutils.requestPermissions
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
@@ -46,22 +48,21 @@ class MainActivity : AppCompatActivity() {
 
         addCards()
 
-        mtgRv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    Loged.d("End")
-                    addCards()
+        mtgRv
+            .scrollReached()
+            .collectOnUi {
+                when (it) {
+                    RecyclerViewScroll.START -> Loged.r("Start")
+                    RecyclerViewScroll.END -> addCards().also { Loged.r("End") }
                 }
             }
-        })
     }
 
     private fun addCards() {
         GlobalScope.launch {
             pageNumber++
             val info = MtGApi { page { this.pageNumber = this@MainActivity.pageNumber } }
-            Loged.f("${info?.map { it.name }}")
+            info?.let { Loged.f("${it.size} cards") }
             runOnUiThread { info?.let { adapter.addItems(it) } }
         }
     }
