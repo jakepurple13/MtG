@@ -15,11 +15,10 @@ import com.bumptech.glide.request.target.Target
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.flowutils.clicks
 import com.programmersbox.flowutils.collectOnUi
-import com.programmersbox.gsonutils.getJsonApi
 import com.programmersbox.helpfulutils.requestPermissions
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
-import com.programmersbox.mtg.MtGCards.Base
+import com.programmersbox.mtg.MtGCards.MtGApi
 import com.programmersbox.mtg.MtGCards.MtGCard
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.card_item.view.*
@@ -61,7 +60,7 @@ class MainActivity : AppCompatActivity() {
     private fun addCards() {
         GlobalScope.launch {
             pageNumber++
-            val info = getJsonApi<Base>("https://api.scryfall.com/cards?page=$pageNumber")?.data
+            val info = MtGApi { page { this.pageNumber = this@MainActivity.pageNumber } }
             Loged.f("${info?.map { it.name }}")
             runOnUiThread { info?.let { adapter.addItems(it) } }
         }
